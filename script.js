@@ -69,7 +69,7 @@ function colorForName(name) {
 }
 
 /* =========================================================
-   Default state
+   Default state (dipakai kalau Firestore kosong)
    ========================================================= */
 function newRow(nama = '', tugas = []) {
   return { id: uid(), nama, tugas };
@@ -113,7 +113,7 @@ function defaultState() {
 }
 
 /* =========================================================
-   Firestore
+   Firestore init
    ========================================================= */
 async function initFirestore() {
   try {
@@ -426,16 +426,22 @@ function openSettingsModal() {
   $('#set-anggota').value = state.anggota.join('\n');
   $('#set-tugas').value = state.tugasMaster.join('\n');
   $('#modal-settings').hidden = false;
+  document.body.classList.add('modal-open');
 }
 function saveSettings() {
   state.judul = $('#set-judul').value.trim() || 'JADWAL LANTAI 4';
   state.anggota = toLines($('#set-anggota').value);
   state.tugasMaster = toLines($('#set-tugas').value);
   pushState();
-  $('#modal-settings').hidden = true;
+  closeSettingsModal();
   renderAll();
   toast('Pengaturan disimpan');
 }
+function closeSettingsModal() {
+  $('#modal-settings').hidden = true;
+  document.body.classList.remove('modal-open');
+}
+
 function openDayModal() {
   const day = state.hari.find(h => h.id === ui.activeDayId);
   if (!day) return;
@@ -443,6 +449,7 @@ function openDayModal() {
   $('#day-libur').value = (day.libur || []).join(', ');
   $('#day-catatan').value = day.catatan || '';
   $('#modal-day').hidden = false;
+  document.body.classList.add('modal-open');
 }
 function saveDayModal() {
   const day = state.hari.find(h => h.id === ui.activeDayId);
@@ -451,9 +458,13 @@ function saveDayModal() {
   day.libur = toList($('#day-libur').value);
   day.catatan = $('#day-catatan').value.trim();
   pushState();
-  $('#modal-day').hidden = true;
+  closeDayModal();
   renderAll();
   toast('Info hari disimpan');
+}
+function closeDayModal() {
+  $('#modal-day').hidden = true;
+  document.body.classList.remove('modal-open');
 }
 
 /* =========================================================
@@ -615,22 +626,24 @@ function bindEvents() {
   $('#btn-settings').addEventListener('click', openSettingsModal);
   $('#btn-save-settings').addEventListener('click', saveSettings);
 
+  /* Tutup modal: klik backdrop atau tombol close */
   $('#modal-settings').addEventListener('click', e => {
     if (e.target.dataset.close !== undefined || e.target.id === 'modal-settings') {
-      $('#modal-settings').hidden = true;
+      closeSettingsModal();
     }
   });
   $('#modal-day').addEventListener('click', e => {
     if (e.target.dataset.close !== undefined || e.target.id === 'modal-day') {
-      $('#modal-day').hidden = true;
+      closeDayModal();
     }
   });
   $('#btn-save-day').addEventListener('click', saveDayModal);
 
+  /* Escape untuk tutup modal */
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
-      $('#modal-settings').hidden = true;
-      $('#modal-day').hidden = true;
+      closeSettingsModal();
+      closeDayModal();
     }
   });
 }
