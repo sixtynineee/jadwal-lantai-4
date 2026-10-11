@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jadwal Lantai 4 — Firebase Sync</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="loading" class="loading-overlay">
+  <div class="spinner"></div>
+  <p>Menghubungkan ke server...</p>
+</div>
+
+<div class="app" id="app" hidden>
+  <aside class="sidebar" id="sidebar">
+    <header class="sb-header">
+      <div class="sb-title">Jadwal Lantai 4</div>
+      <div class="sb-actions">
+        <button class="icon-btn" id="btn-copy-all" title="Salin semua hari">📋</button>
+        <button class="icon-btn" id="btn-settings" title="Pengaturan">⚙️</button>
+      </div>
+    </header>
+    <div class="sb-search">
+      <input type="text" id="search-day" placeholder="Cari hari...">
+    </div>
+    <div class="day-list" id="day-list"></div>
+    <button class="fab" id="btn-add-day" title="Tambah hari">+</button>
+  </aside>
+
+  <main class="chat" id="chat">
+    <header class="chat-header">
+      <button class="icon-btn back-btn" id="btn-back">←</button>
+      <div class="chat-avatar" id="chat-avatar">?</div>
+      <div class="chat-info">
+        <div class="chat-title" id="chat-title">Pilih hari</div>
+        <div class="chat-sub" id="chat-sub">—</div>
+      </div>
+      <div class="chat-actions">
+        <button class="icon-btn" id="btn-copy-day" title="Salin hari ini">📋</button>
+        <button class="icon-btn" id="btn-dup-day" title="Duplikat hari">⎘</button>
+        <button class="icon-btn" id="btn-info-day" title="Info hari">✎</button>
+        <button class="icon-btn danger" id="btn-del-day" title="Hapus hari">🗑</button>
+      </div>
+    </header>
+
+    <div class="chat-body" id="chat-body"></div>
+
+    <div class="composer" id="composer">
+      <div class="session-tabs">
+        <button class="tab active" data-session="pagi">☀️ PAGI</button>
+        <button class="tab" data-session="sore">🌙 SORE</button>
+      </div>
+      <div class="composer-row">
+        <label>Untuk</label>
+        <div class="chips" id="person-chips"></div>
+      </div>
+      <div class="composer-row">
+        <label>Tugas</label>
+        <div class="chips" id="task-chips"></div>
+      </div>
+      <div class="composer-actions">
+        <button class="btn-text" id="btn-cancel-edit" hidden>Batal</button>
+        <button class="btn-send" id="btn-send" disabled>Kirim ➤</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Modal Pengaturan -->
+<div class="modal" id="modal-settings" hidden>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Pengaturan</h2>
+      <button class="icon-btn" data-close>✕</button>
+    </div>
+    <div class="modal-body">
+      <label class="field">
+        <span>Judul</span>
+        <input type="text" id="set-judul">
+      </label>
+      <label class="field">
+        <span>Anggota (satu per baris)</span>
+        <textarea id="set-anggota" rows="5"></textarea>
+      </label>
+      <label class="field">
+        <span>Daftar Tugas (satu per baris)</span>
+        <textarea id="set-tugas" rows="12"></textarea>
+      </label>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" data-close>Batal</button>
+      <button class="btn-primary" id="btn-save-settings">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Info Hari -->
+<div class="modal" id="modal-day" hidden>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Info Hari</h2>
+      <button class="icon-btn" data-close>✕</button>
+    </div>
+    <div class="modal-body">
+      <label class="field">
+        <span>Tanggal</span>
+        <input type="text" id="day-tanggal" placeholder="cth: 31 agustus 2026">
+      </label>
+      <label class="field">
+        <span>Libur (pisah dengan koma)</span>
+        <input type="text" id="day-libur" placeholder="cth: Daffa, Chusna">
+      </label>
+      <label class="field">
+        <span>Catatan</span>
+        <input type="text" id="day-catatan" placeholder="cth: Daffa & Ummi backup Arim">
+      </label>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" data-close>Batal</button>
+      <button class="btn-primary" id="btn-save-day">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module" src="script.js"></script>
+</body>
+</html>
