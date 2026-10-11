@@ -25,16 +25,15 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db  = getFirestore(app);
 
-/* Satu dokumen untuk seluruh state.
-   Ganti path kalau mau multi-tenant. */
+/* Satu dokumen untuk seluruh state */
 const STATE_DOC = doc(db, 'app', 'state');
 
 /* =========================================================
    State lokal
    ========================================================= */
-let state = null;           // diisi dari Firestore
-let unsubscribe = null;     // listener Firestore
-let isSyncing = false;      // hindari loop tulis-baca
+let state = null;
+let unsubscribe = null;
+let isSyncing = false;
 
 const ui = {
   activeDayId: null,
@@ -70,7 +69,7 @@ function colorForName(name) {
 }
 
 /* =========================================================
-   Default state (dipakai kalau Firestore kosong)
+   Default state
    ========================================================= */
 function newRow(nama = '', tugas = []) {
   return { id: uid(), nama, tugas };
@@ -114,13 +113,12 @@ function defaultState() {
 }
 
 /* =========================================================
-   Firestore: muat + listener real-time
+   Firestore
    ========================================================= */
 async function initFirestore() {
   try {
     const snap = await getDoc(STATE_DOC);
     if (!snap.exists()) {
-      // Dokumen belum ada → buat default
       state = defaultState();
       ui.activeDayId = state.hari[0]?.id || null;
       await setDoc(STATE_DOC, state);
@@ -150,9 +148,8 @@ function listenFirestore() {
   unsubscribe = onSnapshot(STATE_DOC, (snap) => {
     if (!snap.exists()) return;
     const incoming = normalizeState(snap.data());
-    if (isSyncing) return; // perubahan dari kita sendiri
+    if (isSyncing) return;
     state = incoming;
-    // Pastikan activeDayId masih valid
     if (!state.hari.find(h => h.id === ui.activeDayId)) {
       ui.activeDayId = state.hari[0]?.id || null;
     }
@@ -171,14 +168,12 @@ async function pushState() {
     console.error('Gagal menyimpan:', err);
     toast('Gagal menyimpan ke server');
   } finally {
-    // beri jeda agar onSnapshot tidak langsung menimpa UI
     setTimeout(() => { isSyncing = false; }, 400);
   }
 }
 
 function normalizeState(s) {
   if (!s || !Array.isArray(s.hari)) return defaultState();
-  if (!Array.isArray(s.paket))  s.paket = [];
   if (!Array.isArray(s.anggota)) s.anggota = [];
   if (typeof s.judul !== 'string') s.judul = 'JADWAL LANTAI 4';
   if (!Array.isArray(s.tugasMaster)) s.tugasMaster = defaultState().tugasMaster;
@@ -471,16 +466,22 @@ function generateDayText(day) {
   out.push('Tanggal ' + day.tanggal);
   out.push('');
   out.push('PAGI');
-  day.pagi.forEach(r => {
-    out.push(`${r.nama} : ${r.tugas.join(', ')}`);
-  });
-  if (!day.pagi.length) out.push('(belum ada penugasan)');
+  if (day.pagi.length) {
+    day.pagi.forEach(r => {
+      out.push(`${r.nama} : ${r.tugas.join(', ')}`);
+    });
+  } else {
+    out.push('(belum ada penugasan)');
+  }
   out.push('');
   out.push('SORE');
-  day.sore.forEach(r => {
-    out.push(`${r.nama} : ${r.tugas.join(', ')}`);
-  });
-  if (!day.sore.length) out.push('(belum ada penugasan)');
+  if (day.sore.length) {
+    day.sore.forEach(r => {
+      out.push(`${r.nama} : ${r.tugas.join(', ')}`);
+    });
+  } else {
+    out.push('(belum ada penugasan)');
+  }
   if (day.libur && day.libur.length) {
     out.push('');
     day.libur.forEach(n => out.push('- ' + n + ' libur'));
